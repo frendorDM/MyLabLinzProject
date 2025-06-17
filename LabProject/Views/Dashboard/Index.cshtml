@@ -1,0 +1,101 @@
+@model LabProject.Models.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Sales Dashboard";
+}
+
+<div class="container mt-4">
+    <h2>Sales Dashboard</h2>
+
+    @if (Model.HighestSpendingCustomer != null)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Highest Spending Customer</h4>
+            </div>
+            <div class="card-body">
+                <h5>@Model.HighestSpendingCustomer.Name @Model.HighestSpendingCustomer.Surname</h5>
+                <p>Email: @Model.HighestSpendingCustomer.Email</p>
+                <p>Country: @Model.HighestSpendingCustomer.CountryOfResidence</p>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Top 5 Most Frequently Purchased Items</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="topItemsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>All Customers</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Country</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var customer in Model.AllCustomers)
+                                {
+                                    <tr>
+                                        <td>@customer.Name @customer.Surname</td>
+                                        <td>@customer.Email</td>
+                                        <td>@customer.CountryOfResidence</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('topItemsChart').getContext('2d');
+            var data = {
+                labels: [@Html.Raw(string.Join(",", Model.TopSellingItems.Select(x => $"'{x.SkuName}'")))],
+                datasets: [{
+                    data: [@string.Join(",", Model.TopSellingItems.Select(x => x.TotalQuantity))],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+} 
